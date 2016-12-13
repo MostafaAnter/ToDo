@@ -1,8 +1,10 @@
 package com.mostafa_anter.todo;
 
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
@@ -11,6 +13,7 @@ import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Toast;
 
 import com.mostafa_anter.todo.adapters.CustomAdapter;
 import com.mostafa_anter.todo.models.RowItem;
@@ -21,15 +24,40 @@ import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity
+        implements SwipeRefreshLayout.OnRefreshListener{
 
-    @BindView(R2.id.recyclerView)RecyclerView mRecyclerView;
     @BindView(R2.id.toolbar)Toolbar toolbar;
+    @BindView(R2.id.recyclerView)RecyclerView mRecyclerView;
+    @BindView(R2.id.swiperefresh)SwipeRefreshLayout mSwipeRefreshLayout;
 
     private static final String TAG = "RecyclerViewFragment";
     private static final String KEY_LAYOUT_MANAGER = "layoutManager";
     private static final int SPAN_COUNT = 2;
     private static final int DATASET_COUNT = 60;
+
+    @Override
+    public void onRefresh() {
+        Toast.makeText(this, "Hello from refresh :)", Toast.LENGTH_SHORT).show();
+
+        new AsyncTask<Void, Void, Void>() {
+            @Override
+            protected Void doInBackground(Void... voids) {
+                try {
+                    Thread.sleep(2000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                return null;
+            }
+
+            @Override
+            protected void onPostExecute(Void aVoid) {
+                super.onPostExecute(aVoid);
+                mSwipeRefreshLayout.setRefreshing(false);
+            }
+        }.execute();
+    }
 
     private enum LayoutManagerType {
         GRID_LAYOUT_MANAGER,
@@ -49,6 +77,14 @@ public class MainActivity extends AppCompatActivity {
         ButterKnife.bind(this);
         setSupportActionBar(toolbar);
 
+        setmRecyclerView(savedInstanceState);
+
+        // Set the color scheme of the SwipeRefreshLayout by providing 4 color resource ids
+        //noinspection ResourceAsColor
+        mSwipeRefreshLayout.setColorScheme(
+                R.color.swipe_color_1, R.color.swipe_color_2,
+                R.color.swipe_color_3, R.color.swipe_color_4);
+
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -58,7 +94,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        setmRecyclerView(savedInstanceState);
+        mSwipeRefreshLayout.setOnRefreshListener(this);
     }
 
     private void setmRecyclerView(Bundle savedInstanceState){
