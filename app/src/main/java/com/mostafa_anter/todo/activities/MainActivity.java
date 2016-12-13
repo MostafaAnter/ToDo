@@ -1,4 +1,4 @@
-package com.mostafa_anter.todo;
+package com.mostafa_anter.todo.activities;
 
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -15,7 +15,10 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
 
+import com.mostafa_anter.todo.R;
+import com.mostafa_anter.todo.R2;
 import com.mostafa_anter.todo.adapters.CustomAdapter;
+import com.mostafa_anter.todo.fragments.AddRowItemDialog;
 import com.mostafa_anter.todo.models.RowItem;
 
 import java.util.ArrayList;
@@ -89,8 +92,7 @@ public class MainActivity extends AppCompatActivity
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
+               new AddRowItemDialog().show(getFragmentManager(),"AddRowItemDialog");
             }
         });
 
@@ -113,7 +115,6 @@ public class MainActivity extends AppCompatActivity
         mAdapter = new CustomAdapter(mDataset);
         // Set CustomAdapter as the adapter for RecyclerView.
         mRecyclerView.setAdapter(mAdapter);
-        initDataset();
     }
 
     public void setRecyclerViewLayoutManager(LayoutManagerType layoutManagerType) {
@@ -172,14 +173,8 @@ public class MainActivity extends AppCompatActivity
         super.onSaveInstanceState(savedInstanceState);
     }
 
-    /**
-     * Generates Strings for RecyclerView's adapter. This data would usually come
-     * from a local content provider or remote server.
-     */
-    private void initDataset() {
-        for (int i = 0; i < DATASET_COUNT; i++) {
-            mDataset.add(new RowItem("Title", "some description..."));
-            mAdapter.notifyDataSetChanged();
-        }
+    public void addNewItem(RowItem rowItem){
+        mDataset.add(rowItem);
+        mAdapter.notifyDataSetChanged();
     }
 }
