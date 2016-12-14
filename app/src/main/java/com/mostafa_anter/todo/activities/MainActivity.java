@@ -3,23 +3,23 @@ package com.mostafa_anter.todo.activities;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.view.View;
+import android.support.v7.widget.helper.ItemTouchHelper;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.Toast;
-
 import com.mostafa_anter.todo.R;
 import com.mostafa_anter.todo.R2;
 import com.mostafa_anter.todo.adapters.CustomAdapter;
 import com.mostafa_anter.todo.fragments.AddRowItemDialog;
 import com.mostafa_anter.todo.models.RowItem;
+import com.mostafa_anter.todo.utils.Utils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -115,6 +115,27 @@ public class MainActivity extends AppCompatActivity
         mAdapter = new CustomAdapter(mDataset);
         // Set CustomAdapter as the adapter for RecyclerView.
         mRecyclerView.setAdapter(mAdapter);
+
+        new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.RIGHT
+        | ItemTouchHelper.LEFT) {
+            @Override
+            public boolean onMove(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder, RecyclerView.ViewHolder target) {
+                return false;
+            }
+
+            @Override
+            public void onSwiped(RecyclerView.ViewHolder viewHolder, int direction) {
+                int position = viewHolder.getAdapterPosition();
+                String title = mDataset.get(position).getTitle();
+                Utils.deleteItemFromDb(title, MainActivity.this);
+
+                mDataset.remove(position);
+                mAdapter.notifyDataSetChanged();
+
+            }
+        }).attachToRecyclerView(mRecyclerView);
+
+        initDataSet();
     }
 
     public void setRecyclerViewLayoutManager(LayoutManagerType layoutManagerType) {
@@ -175,6 +196,12 @@ public class MainActivity extends AppCompatActivity
 
     public void addNewItem(RowItem rowItem){
         mDataset.add(rowItem);
+        mAdapter.notifyDataSetChanged();
+        Utils.putRowItemInsideDb(rowItem, this);
+    }
+
+    private void initDataSet(){
+        mDataset.addAll(Utils.returnListFromCursor(Utils.getData(this)));
         mAdapter.notifyDataSetChanged();
     }
 }
